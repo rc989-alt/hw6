@@ -137,12 +137,9 @@ def server(input, output, session):
 
     # Handle user messages with streaming responses
     @chat.on_user_submit
-    async def handle_user_input():
-        # Get the messages from the chat
-        messages = chat.messages(format="openai")
-
+    async def handle_user_input(user_input: str):
         # Stream the response from the LLM
-        response = await chat_client.stream_async(messages)
+        response = await chat_client.stream_async(user_input)
 
         # Append the streaming response to the chat
         await chat.append_message_stream(response)
