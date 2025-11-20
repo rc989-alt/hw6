@@ -127,7 +127,7 @@ def server(input, output, session):
 
     # Initialize the OpenAI chat client with system prompt
     chat_client = ChatOpenAI(
-        model="gpt-4o-mini",
+        model="gpt-3.5-turbo",
         system_prompt=SYSTEM_PROMPT,
         api_key=os.getenv("OPENAI_API_KEY")
     )
