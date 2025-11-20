@@ -1,4 +1,2 @@
-shiny>=1.5.0
-shinychat>=0.2.8
-openai>=1.0.0
-python-dotenv>=1.0.0
+shiny>=1.2.0
+chatlas>=0.2.0

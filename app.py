@@ -5,12 +5,8 @@ A RAG-powered tutoring assistant for the Applied Machine Learning course
 
 import os
 from pathlib import Path
-from shiny import App, ui, reactive
-from shinychat import chat_ui, chat_server
-from openai import OpenAI
-
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+from shiny import App, ui
+from chatlas import ChatOpenAI
 
 # Load knowledge base files
 def load_knowledge_base():
@@ -122,21 +118,34 @@ app_ui = ui.page_fluid(
             Feel free to ask me anything about the course!
             """)
         ),
-        chat_ui("chat")
+        ui.chat_ui("chat")
     )
 )
 
 def server(input, output, session):
     """Server function with chat integration"""
 
-    chat = chat_server(
-        "chat",
+    # Initialize the OpenAI chat client with system prompt
+    chat_client = ChatOpenAI(
         model="gpt-4o",
         system_prompt=SYSTEM_PROMPT,
-        api_key=os.getenv("OPENAI_API_KEY"),
-        temperature=0.7,
-        max_tokens=1000
+        api_key=os.getenv("OPENAI_API_KEY")
     )
+
+    # Create chat instance
+    chat = ui.Chat(id="chat")
+
+    # Handle user messages with streaming responses
+    @chat.on_user_submit
+    async def handle_user_input():
+        # Get the messages from the chat
+        messages = chat.messages(format="openai")
+
+        # Stream the response from the LLM
+        response = await chat_client.stream_async(messages)
+
+        # Append the streaming response to the chat
+        await chat.append_message_stream(response)
 
 # Create the Shiny app
 app = App(app_ui, server)
