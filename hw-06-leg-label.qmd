@@ -157,8 +157,7 @@ The analysis generated three key visualizations saved in `figures/`:
 
 This exercise implements an intelligent tutoring assistant using the shinychat framework with Retrieval-Augmented Generation (RAG) to provide accurate, context-aware responses about course content.
 
-**Live Deployment**: [INFO 4940/5940 Tutor Chatbot](https://connect.posit.cloud/content/your-app-id)
-*(Note: Update this link after deployment)*
+**Live Deployment**: [INFO 4940/5940 Tutor Chatbot](https://019aa31e-982f-17f6-37c8-55b3193c9b63.share.connect.posit.cloud)
 
 ### Features
 
@@ -173,9 +172,9 @@ The chatbot is designed to help students with:
 
 ### Technical Implementation
 
-**Framework**: Built with shinychat (Python)
+**Framework**: Built with Shiny for Python using the chatlas library
 
-**Model**: GPT-4o for high-quality, accurate responses
+**Model**: GPT-4.1 for high-quality, accurate responses
 
 **RAG Knowledge Base**: Three curated knowledge documents:
 - `course-overview.md` - Course description, objectives, and structure
@@ -211,10 +210,9 @@ The application is deployed on Posit Connect Cloud with:
 - Requirements specified in `requirements.txt`
 
 **Dependencies:**
-- shiny >= 1.5.0
-- shinychat >= 0.2.8
+- shiny >= 1.2.0
+- chatlas >= 0.2.0
 - openai >= 1.0.0
-- python-dotenv >= 1.0.0
 
 ### Design Philosophy
 
