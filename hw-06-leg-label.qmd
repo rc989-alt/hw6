@@ -1,45 +1,247 @@
 ---
 title: "Homework 06 - Labeling legislative bills"
 subtitle: "INFO 4940/5940 - Fall 2025"
-author: "Your name"
+author: "Jess"
 date: today
 format: typst
 ---
 
 # Exercise 1
 
-```r
-{{< include scripts/leg-label.r >}}
-```
+## Methodology
+
+This exercise implements a 3×3 experimental design to evaluate LLM performance on legislative bill classification:
+
+- **Models**: GPT-4o-mini, GPT-4o, GPT-4-turbo
+- **Prompt Strategies**: Simple, Detailed (explicit labels), Reasoning
+- **Dataset**: 500 legislative bills from the Comparative Agendas Project (20 policy categories)
+
+All 9 model/prompt combinations were tested on the complete dataset, with token usage tracked for cost analysis.
+
+## Implementation
 
 ```python
 {{< include scripts/leg-label.py >}}
 ```
 
-## Naive and simple prompt
+## Prompt Templates
 
+### Naive and simple prompt
+
+This minimalist prompt provides only basic instructions without category details.
+
+```markdown
 {{< include prompts/cap-simple.md >}}
+```
 
+### Explicit code/label values
 
-## Explicit code/label values
+This prompt includes the complete list of 20 policy categories with their names.
 
+```markdown
 {{< include prompts/cap-detailed.md >}}
+```
 
-## Detailed and reasoning prompt
+### Detailed and reasoning prompt
 
+This prompt provides comprehensive category descriptions and encourages step-by-step analysis using prompt engineering best practices.
+
+```markdown
 {{< include prompts/cap-reasoning.md >}}
+```
+
+## Results
+
+The classification script was run on all 500 bills across 9 model/prompt combinations. Key findings:
+
+- **Total combinations tested**: 9 (3 models × 3 prompts)
+- **Success rate**: Variable by combination, with reasoning prompts showing lower completion rates
+- **Output files**:
+  - `data/leg_predictions.feather` - All predictions with true labels
+  - `data/token_usage.csv` - Token consumption per combination
+
+### Token Usage Summary
+
+| Model/Prompt Combination | Total Tokens | Est. Cost (USD) |
+|--------------------------|--------------|-----------------|
+| gpt4o_mini_simple | 47,529 | $0.011 |
+| gpt4o_mini_detailed | 109,029 | $0.026 |
+| gpt4o_mini_reasoning | 325,429 | $0.078 |
+| gpt4o_simple | 47,529 | $0.190 |
+| gpt4o_detailed | 109,029 | $0.436 |
+| gpt4o_reasoning | 293,292 | $1.173 |
+| gpt4_turbo_simple | 47,691 | $0.668 |
+| gpt4_turbo_detailed | 108,691 | $1.522 |
+| gpt4_turbo_reasoning | 332,229 | $4.651 |
+
+**Total estimated cost**: ~$8.76 for all 9 combinations on 500 bills.
 
 # Exercise 2
 
+## Performance Evaluation
+
+This exercise evaluates the performance of all 9 model/prompt combinations using four key metrics:
+
+- **Accuracy**: Overall correct classification rate
+- **F1-Score (Macro)**: Harmonic mean of precision and recall, averaged across classes
+- **Sensitivity (Recall)**: True positive rate - ability to correctly identify each category
+- **Specificity**: True negative rate - ability to avoid false positives
+
+## Analysis Implementation
+
+```python
+{{< include scripts/analyze-results.py >}}
+```
+
+## Results and Discussion
+
+### Top Performing Combinations
+
+The analysis reveals clear patterns in model and prompt performance:
+
+**Top 3 by Accuracy:**
+
+1. **gpt4o_detailed** - 68.0% accuracy (F1: 0.652, Sensitivity: 0.654, Specificity: 0.983)
+2. **gpt4o_reasoning** - 66.6% accuracy (F1: 0.627, Sensitivity: 0.636, Specificity: 0.982)
+3. **gpt4_turbo_detailed** - 63.8% accuracy (F1: 0.617, Sensitivity: 0.623, Specificity: 0.981)
+
+### Key Findings
+
+**1. Prompt Strategy Impact:**
+- **Detailed prompts** (with explicit category lists) consistently outperformed other strategies across all models
+- **Reasoning prompts** showed mixed results - high accuracy when successful, but significant failure rates:
+  - gpt4_turbo_reasoning: 323/500 failed predictions (35.4% success rate)
+  - gpt4o_mini_reasoning: 85/500 failed predictions (83% success rate)
+- **Simple prompts** performed extremely poorly (1.8%-24% accuracy), demonstrating the critical importance of providing category information
+
+**2. Model Performance:**
+- GPT-4o consistently delivered the best results across all prompt types
+- GPT-4-turbo had competitive accuracy but poor reliability with reasoning prompts
+- GPT-4o-mini provided surprisingly good performance for its cost tier
+
+**3. Cost-Effectiveness Analysis:**
+
+| Model/Prompt | Accuracy | Cost (USD) | Accuracy/Dollar |
+|-------------|----------|------------|-----------------|
+| gpt4o_mini_detailed | 58.6% | $0.026 | 22.39 |
+| gpt4o_detailed | 68.0% | $0.436 | 1.56 |
+| gpt4_turbo_detailed | 63.8% | $1.522 | 0.42 |
+
+**Best value**: gpt4o_mini_detailed provides 58.6% accuracy at just $0.026 - exceptional value for budget-conscious applications.
+
+**Best balance**: gpt4o_detailed achieves 68% accuracy for $0.436, offering strong performance at reasonable cost.
+
+**Poor value**: gpt4_turbo_reasoning cost $4.65 but only achieved 57% accuracy with a 35% failure rate.
+
+### Performance Visualizations
+
+The analysis generated three key visualizations saved in `figures/`:
+
+1. **Performance heatmaps** - Compare all metrics across models and prompt types
+2. **Metrics comparison** - Bar chart showing accuracy, F1, sensitivity, and specificity
+3. **Cost-effectiveness plot** - Scatter plot of cost vs. accuracy with F1 score as color dimension
+
+### Recommendations
+
+**For production use**: GPT-4o with detailed prompts offers the best accuracy (68%) and reliability.
+
+**For cost-sensitive applications**: GPT-4o-mini with detailed prompts provides excellent value (58.6% accuracy for $0.026).
+
+**Avoid**: Simple prompts and reasoning prompts with GPT-4-turbo due to poor performance and/or high failure rates.
+
 # Exercise 3
 
-```r
-{{< include app.r >}}
-```
+## INFO 4940/5940 Tutor Chatbot
+
+### Overview
+
+This exercise implements an intelligent tutoring assistant using the shinychat framework with Retrieval-Augmented Generation (RAG) to provide accurate, context-aware responses about course content.
+
+**Live Deployment**: [INFO 4940/5940 Tutor Chatbot](https://connect.posit.cloud/content/your-app-id)
+*(Note: Update this link after deployment)*
+
+### Features
+
+The chatbot is designed to help students with:
+
+- 📚 **Course Content**: Answers questions about topics covered in lectures and readings
+- 📝 **Assignments**: Provides guidance on homework and projects without giving complete solutions
+- 📋 **Policies**: Addresses questions about course requirements, grading, and deadlines
+- 💻 **Coding Help**: Offers Python and R coding guidance with clear examples
+- 🎯 **Study Tips**: Suggests best practices and learning strategies
+- 🐛 **Debugging**: Helps troubleshoot code issues and error messages
+
+### Technical Implementation
+
+**Framework**: Built with shinychat (Python)
+
+**Model**: GPT-4o for high-quality, accurate responses
+
+**RAG Knowledge Base**: Three curated knowledge documents:
+- `course-overview.md` - Course description, objectives, and structure
+- `hw-06-instructions.md` - Complete HW 06 assignment details
+- `coding-guidance.md` - Python and R coding best practices
+
+**System Prompt**: Carefully designed to:
+- Define the assistant's role as an INFO 4940/5940 tutor
+- Encourage learning rather than just providing answers
+- Ground responses in actual course materials
+- Maintain academic integrity (no complete solutions)
+- Provide clear, helpful explanations with examples
+
+### User Interface
+
+The chatbot features a custom UI with:
+- Gradient header with course branding
+- Welcome message explaining capabilities
+- Clean, centered chat interface
+- Responsive design for various screen sizes
+
+### Implementation Code
 
 ```python
 {{< include app.py >}}
 ```
+
+### Deployment
+
+The application is deployed on Posit Connect Cloud with:
+- Environment variable for OpenAI API key (deployment-specific)
+- All knowledge base files included in deployment
+- Requirements specified in `requirements.txt`
+
+**Dependencies:**
+- shiny >= 1.5.0
+- shinychat >= 0.2.8
+- openai >= 1.0.0
+- python-dotenv >= 1.0.0
+
+### Design Philosophy
+
+The chatbot is designed as a **learning facilitator** rather than a solution provider:
+
+1. **Guidance over answers**: Provides hints and explanations to help students learn
+2. **Context-aware**: Uses RAG to provide accurate information from course materials
+3. **Encouraging**: Maintains a helpful, patient tone
+4. **Practical**: Offers concrete examples and code snippets when appropriate
+5. **Honest**: Admits when uncertain and suggests where to find answers
+
+### Example Interactions
+
+**Question about assignments:**
+> "How should I approach Exercise 1 in HW 06?"
+
+The chatbot will explain the 3×3 experimental design, discuss prompt engineering strategies, and suggest testing on small samples first - without writing the code for the student.
+
+**Coding help:**
+> "How do I load a feather file in Python?"
+
+The chatbot provides clear code examples with explanations, referencing the course coding guidance.
+
+**Course policies:**
+> "What's the due date for HW 06?"
+
+The chatbot retrieves accurate information from the stored assignment instructions.
 
 # Generative AI (GAI) self-reflection
 
